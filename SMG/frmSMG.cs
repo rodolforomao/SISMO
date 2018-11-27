@@ -22,6 +22,7 @@ namespace SMG
         const String WEBSITE_PREGOES_EM_ANDAMENTO = "http://comprasnet.gov.br/acesso.asp?url=/livre/Pregao/lista_pregao_filtro.asp?Opc=2";
         const String WEBSITE_PREGOES_ATAS = "http://comprasnet.gov.br/acesso.asp?url=/livre/Pregao/ata0.asp";
         const String WEBSITE_PREGOES_REALIZADOS_PENDENTES_RECURSO_ADJUDICACAO_HOMOLOGACAO = "http://comprasnet.gov.br/acesso.asp?url=/livre/Pregao/lista_pregao_filtro.asp?Opc=1";
+        const String WEBSITE_PREGOES_REVOGADOS_ANULADOS_OU_ABANDONADOS = "http://comprasnet.gov.br/acesso.asp?url=/livre/Pregao/lista_pregao_filtro.asp?Opc=3";
 
         #endregion
 
@@ -48,6 +49,8 @@ namespace SMG
                     bs.ListObject.Add(VOCertame.CERTAME_EM_ANDAMENTO);
                 else if (cmbTipoPesquisa.SelectedItem.ToString().ToUpper().Contains("REALIZADOS"))
                     bs.ListObject.Add(VOCertame.CERTAME_REALIZADOS_PENDENTES_RECURSO_ADJUDICACAO_HOMOLOGACAO);
+                else if (cmbTipoPesquisa.SelectedItem.ToString().ToUpper().Contains("REVOGADOS"))
+                    bs.ListObject.Add(VOCertame.CERTAME_REVOGADOS_ANULADOS_OU_ABANDONADOS);
                 else if (cmbTipoPesquisa.SelectedItem.ToString().ToUpper().Contains("ATAS"))
                     bs.ListObject.Add(VOCertame.CERTAME_ATAS);
 
@@ -119,6 +122,15 @@ namespace SMG
                     _bs.ListObject.Add(voCertame);
                     _bs.ListObject.Add(VOCertame.CERTAME_REALIZADOS_PENDENTES_RECURSO_ADJUDICACAO_HOMOLOGACAO);
                     bsCertamesPesquisadoAgora = navegar.realizarPesquisalistaPregaoRealizadosPendentesdeRecursoAdjudicaçãoHomologação(_bs);
+
+                    bsIO.ListObject.Add(VOCertame.CERTAME_REALIZADOS_PENDENTES_RECURSO_ADJUDICACAO_HOMOLOGACAO);
+                }
+                else if (statusDoCertame.Contains(VOCertame.CERTAME_REVOGADOS_ANULADOS_OU_ABANDONADOS))
+                {
+                    _bs.ListObject.Add(WEBSITE_PREGOES_REVOGADOS_ANULADOS_OU_ABANDONADOS);
+                    _bs.ListObject.Add(voCertame);
+                    _bs.ListObject.Add(VOCertame.CERTAME_REVOGADOS_ANULADOS_OU_ABANDONADOS);
+                    bsCertamesPesquisadoAgora = navegar.realizarPesquisalistaPregaoRevogadosAnuladosOuAbandonados(_bs);
 
                     bsIO.ListObject.Add(VOCertame.CERTAME_EM_ANDAMENTO);
                 }
@@ -193,7 +205,7 @@ namespace SMG
 
         private void frmSMG_Load(object sender, EventArgs e)
         {
-            cmbTipoPesquisa.SelectedIndex = 2;
+            cmbTipoPesquisa.SelectedIndex = 3;
         }
 
         private void btnUploadDb_Click(object sender, EventArgs e)

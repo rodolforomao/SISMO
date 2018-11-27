@@ -493,7 +493,7 @@ namespace SMG
 
                                                                                             }
                                                                                         }
-                                                                                            
+
                                                                                     }
                                                                                 }
                                                                             }
@@ -798,6 +798,297 @@ namespace SMG
                                 if (contador > 3)
                                     repetir = false;
                             }
+
+
+                        } while (repetir);
+
+
+                    }
+
+                }// for
+            }
+
+            return bs;
+        }
+
+        public BusinessService realizarPesquisalistaPregaoRevogadosAnuladosOuAbandonados(BusinessService _bs)
+        {
+            BusinessService bs = new BusinessService();
+
+            bs.Operation = BusinessService.OPRATION_READ;
+
+            ChromeOptions options = new ChromeOptions();
+            int option = 0;
+
+
+            //options.AddArguments("--proxy-server=138.94.71.202");
+            //options.AddArgument(@"--incognito");
+            options.AddArgument("--start-maximized");
+
+            using (var driver = new ChromeDriver(options))
+            {
+                // Rastrear outros tipos de licitação
+                //for (option = 0; option < 5; option++)
+                // http://comprasnet.gov.br/acesso.asp?url=/livre/Pregao/lista_pregao_filtro.asp?Opc=0
+                // 	Pesquisa por: PREGÕES AGENDADOS
+                // http://comprasnet.gov.br/acesso.asp?url=/livre/Pregao/lista_pregao_filtro.asp?Opc=1
+                // 	Pesquisa por: PREGÕES REALIZADOS, PENDENTES DE RECURSO/ ADJUDICAÇAO / HOMOLOGAÇÃO
+                // http://comprasnet.gov.br/acesso.asp?url=/livre/Pregao/lista_pregao_filtro.asp?Opc=2
+                // 	Pesquisa por:  PREGÕES EM ANDAMENTO
+                // http://comprasnet.gov.br/acesso.asp?url=/livre/Pregao/lista_pregao_filtro.asp?Opc=3
+                // 	Pesquisa por:  PREGÕES REVOGADOS, ANULADOS OU ABANDONADOS
+
+                IList listaUASG = listaUASGDnit();
+
+                foreach (ComboItem objComboUASG in listaUASG)
+                {
+
+                    _bs.ObjectDriver = driver;
+                    IWebDriver _driver = _bs.ObjectDriver;
+                    String statusDoCertame = _bs.ListObject[2].ToString();
+
+                    // Pregões agendados
+                    //  "http://comprasnet.gov.br/acesso.asp?url=/livre/Pregao/lista_pregao_filtro.asp?Opc=3";
+                    String enderecoUrlString = _bs.ListObject[0].ToString();
+                    String idElement = "";
+                    String keysSendElement = String.Empty;
+                    IWebElement element = null;
+
+                    AcaoSelenium acaoSelenium = new AcaoSelenium();
+
+                    if ((acaoSelenium.goToUrl(_driver, AcaoSelenium.TIMEOUT_WAIT_1_SECOND, AcaoSelenium.NUMBER_ATTEMPTS_5, AcaoSelenium.TIME_SLEEP_OPERATION_NONE, enderecoUrlString, "", AcaoSelenium.TYPE_METHOD_FIND_BY_XPATH, idElement, false)))
+                    {
+
+                        driver.SwitchTo().Frame(1);
+
+                        Boolean repetir = false;
+                        int contador = 0;
+                        do
+                        {
+                            contador++;
+                            //idElement = "lstSituacao";
+                            //keysSendElement = "Todas";
+
+                            //if ((bool)acaoSelenium.DropDownList(_driver, idElement, keysSendElement, AcaoSelenium.NUMBER_ATTEMPTS_3, AcaoSelenium.DROPDOWNLIST_TYPE_SEARCH_EXACT_TEXT))
+                            {
+
+                                idElement = "co_uasg";
+
+                                VOCertame vo = (VOCertame)_bs.ListObject[1];
+                                //keysSendElement = vo.Uasg;
+                                keysSendElement = objComboUASG.Value.ToString();
+                                String uasg = keysSendElement;
+                                if (acaoSelenium.encontrarElementoAgir(_driver, AcaoSelenium.TIMEOUT_WAIT_1_SECOND, AcaoSelenium.NUMBER_ATTEMPTS_5, AcaoSelenium.TIME_SLEEP_OPERATION_NONE, idElement, keysSendElement, AcaoSelenium.TYPE_METHOD_FIND_BY_ID, AcaoSelenium.TYPE_METHOD_ACTION_SEND_KEYS, ref element))
+                                {
+
+                                    idElement = "dt_entrega";
+                                    //keysSendElement = DateTime.Now.AddDays(-contador).ToShortDateString();
+                                    keysSendElement = String.Empty;
+                                    if (acaoSelenium.encontrarElementoAgir(_driver, AcaoSelenium.TIMEOUT_WAIT_1_SECOND, AcaoSelenium.NUMBER_ATTEMPTS_5, AcaoSelenium.TIME_SLEEP_OPERATION_NONE, idElement, keysSendElement, AcaoSelenium.TYPE_METHOD_FIND_BY_ID, AcaoSelenium.TYPE_METHOD_ACTION_SEND_KEYS, ref element))
+                                    {
+                                        idElement = "ok";
+                                        if (acaoSelenium.encontrarElementoAgir(_driver, AcaoSelenium.TIMEOUT_WAIT_1_SECOND, AcaoSelenium.NUMBER_ATTEMPTS_5, AcaoSelenium.TIME_SLEEP_OPERATION_NONE, idElement, keysSendElement, AcaoSelenium.TYPE_METHOD_FIND_BY_ID, AcaoSelenium.TYPE_METHOD_ACTION_CLICK, ref element))
+                                        {
+                                            Boolean tryAgain = false;
+                                            int contadorErrotryAgain = 0;
+
+                                            do
+                                            {
+                                                contadorErrotryAgain++;
+                                                try
+                                                {
+                                                    idElement = "//*[@id=\"content\"]/div/fieldset/h2";
+                                                    acaoSelenium.encontrarElementoAgir(_driver, AcaoSelenium.TIMEOUT_WAIT_NONE_SECOND, AcaoSelenium.NUMBER_ATTEMPTS_2, AcaoSelenium.TIME_SLEEP_OPERATION_NONE, idElement, keysSendElement, AcaoSelenium.TYPE_METHOD_FIND_BY_XPATH, AcaoSelenium.TYPE_METHOD_ACTION_GET_ELEMENT, ref element);
+
+                                                    if ((element == null) || (element != null && !element.Text.ToLower().Contains("server error")))
+                                                    {
+                                                        idElement = "/html/body/table/tbody/tr[2]/td/table[2]/tbody/tr[2]/td[2]/table/tbody/tr/td/table/tbody/tr[3]/td/table";
+                                                        if (acaoSelenium.encontrarElementoAgir(_driver, AcaoSelenium.TIMEOUT_WAIT_1_SECOND, AcaoSelenium.NUMBER_ATTEMPTS_5, AcaoSelenium.TIME_SLEEP_OPERATION_NONE, idElement, keysSendElement, AcaoSelenium.TYPE_METHOD_FIND_BY_XPATH, AcaoSelenium.TYPE_METHOD_ACTION_GET_ELEMENT, ref element))
+                                                        {
+                                                            String tagTable = "td";
+                                                            int quantidadeColunas = 8;
+                                                            IWebElement baseTable = element;
+
+                                                            // gets all table rows
+                                                            IList rowsDB = baseTable.FindElements(By.TagName(tagTable));
+
+                                                            IList rows = new ArrayList();
+
+                                                            for(int i = 1; i < rowsDB.Count; i++)
+                                                            {
+                                                                rows.Add(rowsDB[i]);
+                                                            }
+
+                                                            int quantidadeItem = rows.Count / quantidadeColunas;
+
+                                                            if (quantidadeItem >= 1)
+                                                            {
+                                                                for (int i = 1; i < quantidadeItem; i++)
+                                                                {
+                                                                    VOCertame certame = new VOCertame();
+                                                                    int index = 0;
+
+                                                                    certame.Status = statusDoCertame;
+                                                                    certame.Modalidade = VOCertame.MODALIDADE_PREGAO_ELETRONICO;
+                                                                    certame.Sigla = VOCertame.MODALIDADE_PREGAO_ELETRONICO_SIGLA;
+                                                                    certame.Numero = (((IWebElement)rows[index++ + quantidadeColunas * i]).Text).Replace("/", "");
+                                                                    certame.Uasg = ((((IWebElement)rows[index++ + quantidadeColunas * i]).Text).Replace("/", ""));
+                                                                    certame.Orgao = ((IWebElement)rows[index++ + quantidadeColunas * i]).Text;
+                                                                    if (option == 0)
+                                                                    {
+                                                                        certame.DataInicioProposta = DateTime.Parse(((IWebElement)rows[index++ + quantidadeColunas * i]).Text);
+                                                                        certame.DataFimProposta = DateTime.Parse(((IWebElement)rows[index++ + quantidadeColunas * i]).Text);
+                                                                        certame.Situacao = (((IWebElement)rows[index++ + quantidadeColunas * i]).Text);
+                                                                        certame.Descricoes = (((IWebElement)rows[index++ + quantidadeColunas * i]).Text);
+                                                                    }
+
+                                                                    idElement = "/html/body/table/tbody/tr[2]/td/table[2]/tbody/tr[2]/td[2]/table/tbody/tr/td/table/tbody/tr[3]/td/table[1]/tbody/tr[" + (i + 2) + "]/td[1]/a";
+                                                                    if (acaoSelenium.encontrarElementoAgir(_driver, AcaoSelenium.TIMEOUT_WAIT_1_SECOND, AcaoSelenium.NUMBER_ATTEMPTS_5, AcaoSelenium.TIME_SLEEP_OPERATION_NONE, idElement, keysSendElement, AcaoSelenium.TYPE_METHOD_FIND_BY_XPATH, AcaoSelenium.TYPE_METHOD_ACTION_CLICK, ref element))
+                                                                    {
+                                                                        String currentContext = acaoSelenium.trocarDeContextoHandleWindow(driver, "Pregao/dados_pregao.asp");
+
+                                                                        idElement = "/html/body/table/tbody/tr[2]/td[2]/form/table/tbody/tr[2]/td/table/tbody/tr/td";
+                                                                        if (acaoSelenium.encontrarElementoAgir(_driver, AcaoSelenium.TIMEOUT_WAIT_NONE_SECOND, AcaoSelenium.NUMBER_ATTEMPTS_5, AcaoSelenium.TIME_SLEEP_OPERATION_NONE, idElement, keysSendElement, AcaoSelenium.TYPE_METHOD_FIND_BY_XPATH, AcaoSelenium.TYPE_METHOD_ACTION_GET_ELEMENT, ref element))
+                                                                        {
+                                                                            String str = element.Text;
+                                                                            String tag2 = "Data da Realização";
+                                                                            String tag1 = "Objeto:";
+                                                                            int index1 = str.IndexOf(tag1) + tag1.Length;
+                                                                            int index2 = str.IndexOf(tag2);
+                                                                            certame.Objeto = str.Substring(index1,index2 - index1);
+
+                                                                            idElement = "fechar";
+                                                                            if (acaoSelenium.encontrarElementoAgir(_driver, AcaoSelenium.TIMEOUT_WAIT_1_SECOND, AcaoSelenium.NUMBER_ATTEMPTS_5, AcaoSelenium.TIME_SLEEP_OPERATION_NONE, idElement, keysSendElement, AcaoSelenium.TYPE_METHOD_FIND_BY_NAME_CLICKABLE, AcaoSelenium.TYPE_METHOD_ACTION_CLICK, ref element))
+                                                                            {
+                                                                                acaoSelenium.retornaContextoHandleWindowPopUp(driver, currentContext);
+                                                                                driver.SwitchTo().Frame(1);
+
+                                                                                idElement = "/html/body/table/tbody/tr[2]/td/table[2]/tbody/tr[2]/td[2]/table/tbody/tr/td/table/tbody/tr[3]/td/table[1]/tbody/tr[" + (i + 2) + "]/td[8]/a";
+                                                                                if (acaoSelenium.encontrarElementoAgir(_driver, AcaoSelenium.TIMEOUT_WAIT_NONE_SECOND, AcaoSelenium.NUMBER_ATTEMPTS_3, AcaoSelenium.TIME_SLEEP_OPERATION_NONE, idElement, keysSendElement, AcaoSelenium.TYPE_METHOD_FIND_BY_XPATH, AcaoSelenium.TYPE_METHOD_ACTION_CLICK, ref element))
+                                                                                {
+                                                                                    String currentContext2 = acaoSelenium.trocarDeContextoHandleWindow(driver, "Pregao/avisos1.asp");
+                                                                                    driver.SwitchTo().Frame(1);
+
+                                                                                    idElement = "/html/body/table/tbody/tr/td[2]/p/a";
+                                                                                    if (acaoSelenium.encontrarElementoAgir(_driver, AcaoSelenium.TIMEOUT_WAIT_1_SECOND, AcaoSelenium.NUMBER_ATTEMPTS_5, AcaoSelenium.TIME_SLEEP_OPERATION_NONE, idElement, keysSendElement, AcaoSelenium.TYPE_METHOD_FIND_BY_XPATH, AcaoSelenium.TYPE_METHOD_ACTION_CLICK, ref element))
+                                                                                    {
+                                                                                        acaoSelenium.trocarDeContextoHandleWindow(driver, "Pregao/avisos4.asp");
+
+                                                                                        idElement = "//*[@id='form1']/table/tbody/tr[3]/td";
+                                                                                        if (acaoSelenium.encontrarElementoAgir(_driver, AcaoSelenium.TIMEOUT_WAIT_1_SECOND, AcaoSelenium.NUMBER_ATTEMPTS_5, AcaoSelenium.TIME_SLEEP_OPERATION_NONE, idElement, keysSendElement, AcaoSelenium.TYPE_METHOD_FIND_BY_XPATH, AcaoSelenium.TYPE_METHOD_ACTION_GET_ELEMENT, ref element))
+                                                                                        {
+
+                                                                                            certame.Mensagens += element.Text;
+
+                                                                                            idElement = "//*[@id='form1']/table/tbody/tr[1]/td/span";
+                                                                                            if (acaoSelenium.encontrarElementoAgir(_driver, AcaoSelenium.TIMEOUT_WAIT_1_SECOND, AcaoSelenium.NUMBER_ATTEMPTS_5, AcaoSelenium.TIME_SLEEP_OPERATION_NONE, idElement, keysSendElement, AcaoSelenium.TYPE_METHOD_FIND_BY_XPATH, AcaoSelenium.TYPE_METHOD_ACTION_GET_ELEMENT, ref element))
+                                                                                            {
+                                                                                                DateTime data = DateTime.MinValue;
+                                                                                                if (DateTime.TryParse(element.Text, out data))
+                                                                                                    certame.DataAtualizacao = data;
+
+                                                                                                idElement = "btFechar";
+                                                                                                if (acaoSelenium.encontrarElementoAgir(_driver, AcaoSelenium.TIMEOUT_WAIT_1_SECOND, AcaoSelenium.NUMBER_ATTEMPTS_5, AcaoSelenium.TIME_SLEEP_OPERATION_NONE, idElement, keysSendElement, AcaoSelenium.TYPE_METHOD_FIND_BY_ID_CLICKABLE, AcaoSelenium.TYPE_METHOD_ACTION_CLICK, ref element))
+                                                                                                {
+                                                                                                    acaoSelenium.retornaContextoHandleWindowPopUp(driver, currentContext);
+                                                                                                    driver.SwitchTo().Frame(1);
+                                                                                                }
+                                                                                            }
+                                                                                        }
+                                                                                    }
+                                                                                }
+                                                                                else
+                                                                                {
+                                                                                   // driver.SwitchTo().Frame(1);
+                                                                                }
+
+                                                                            }
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            String context2 = acaoSelenium.trocarDeContextoHandleWindow(driver, "Pregao/avisos1.asp");
+                                                                            driver.SwitchTo().Frame(1);
+
+                                                                            idElement = "/html/body/table/tbody/tr/td[2]/p/a";
+                                                                            if (acaoSelenium.encontrarElementoAgir(_driver, AcaoSelenium.TIMEOUT_WAIT_1_SECOND, AcaoSelenium.NUMBER_ATTEMPTS_5, AcaoSelenium.TIME_SLEEP_OPERATION_NONE, idElement, keysSendElement, AcaoSelenium.TYPE_METHOD_FIND_BY_XPATH, AcaoSelenium.TYPE_METHOD_ACTION_GET_ELEMENT, ref element))
+                                                                            {
+                                                                                if (acaoSelenium.encontrarElementoAgir(_driver, AcaoSelenium.TIMEOUT_WAIT_1_SECOND, AcaoSelenium.NUMBER_ATTEMPTS_5, AcaoSelenium.TIME_SLEEP_OPERATION_NONE, idElement, keysSendElement, AcaoSelenium.TYPE_METHOD_FIND_BY_XPATH, AcaoSelenium.TYPE_METHOD_ACTION_CLICK, ref element))
+                                                                                {
+                                                                                    String currentContext2 = acaoSelenium.trocarDeContextoHandleWindow(driver, "Pregao/avisos4.asp");
+
+                                                                                    idElement = "//*[@id='form1']/table/tbody/tr[1]/td/span";
+                                                                                    if (acaoSelenium.encontrarElementoAgir(_driver, AcaoSelenium.TIMEOUT_WAIT_1_SECOND, AcaoSelenium.NUMBER_ATTEMPTS_5, AcaoSelenium.TIME_SLEEP_OPERATION_NONE, idElement, keysSendElement, AcaoSelenium.TYPE_METHOD_FIND_BY_XPATH, AcaoSelenium.TYPE_METHOD_ACTION_GET_ELEMENT, ref element))
+                                                                                    {
+                                                                                        DateTime data = DateTime.MinValue;
+                                                                                        if (DateTime.TryParse(element.Text, out data))
+                                                                                            certame.DataAtualizacao = data;
+
+                                                                                        idElement = "//*[@id='form1']/table/tbody/tr[3]/td";
+                                                                                        if (acaoSelenium.encontrarElementoAgir(_driver, AcaoSelenium.TIMEOUT_WAIT_1_SECOND, AcaoSelenium.NUMBER_ATTEMPTS_5, AcaoSelenium.TIME_SLEEP_OPERATION_NONE, idElement, keysSendElement, AcaoSelenium.TYPE_METHOD_FIND_BY_XPATH, AcaoSelenium.TYPE_METHOD_ACTION_GET_ELEMENT, ref element))
+                                                                                        {
+                                                                                            certame.Mensagens += element.Text + System.Environment.NewLine;
+
+                                                                                            idElement = "fechar";
+                                                                                            if (acaoSelenium.encontrarElementoAgir(_driver, AcaoSelenium.TIMEOUT_WAIT_1_SECOND, AcaoSelenium.NUMBER_ATTEMPTS_5, AcaoSelenium.TIME_SLEEP_OPERATION_NONE, idElement, keysSendElement, AcaoSelenium.TYPE_METHOD_FIND_BY_NAME_CLICKABLE, AcaoSelenium.TYPE_METHOD_ACTION_CLICK, ref element))
+                                                                                            {
+                                                                                                acaoSelenium.trocarDeContextoHandleWindow(driver, context2);
+
+                                                                                                driver.SwitchTo().Frame(2);
+
+                                                                                                idElement = "fechar";
+                                                                                                if (acaoSelenium.encontrarElementoAgir(_driver, AcaoSelenium.TIMEOUT_WAIT_1_SECOND, AcaoSelenium.NUMBER_ATTEMPTS_5, AcaoSelenium.TIME_SLEEP_OPERATION_NONE, idElement, keysSendElement, AcaoSelenium.TYPE_METHOD_FIND_BY_NAME_CLICKABLE, AcaoSelenium.TYPE_METHOD_ACTION_CLICK, ref element))
+                                                                                                {
+                                                                                                    acaoSelenium.retornaContextoHandleWindowPopUp(driver, currentContext);
+                                                                                                }
+
+                                                                                            }
+                                                                                        }
+
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+
+                                                                    bs.ListObject.Add(certame);
+                                                                }
+
+                                                            }
+                                                            else
+                                                            {
+                                                                idElement = "voltar";
+                                                                if (acaoSelenium.encontrarElementoAgir(_driver, AcaoSelenium.TIMEOUT_WAIT_1_SECOND, AcaoSelenium.NUMBER_ATTEMPTS_5, AcaoSelenium.TIME_SLEEP_OPERATION_NONE, idElement, keysSendElement, AcaoSelenium.TYPE_METHOD_FIND_BY_NAME, AcaoSelenium.TYPE_METHOD_ACTION_CLICK, ref element))
+                                                                {
+                                                                    repetir = true;
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        bs.Message.Add(element.Text);
+                                                        bs.Result = BusinessService.RESULT_ERROR;
+                                                    }
+                                                }
+                                                catch (Exception e)
+                                                {
+                                                    tryAgain = true;
+                                                    if (contadorErrotryAgain > 3)
+                                                        tryAgain = false;
+                                                }
+                                            } while (tryAgain);
+                                        }
+                                    }
+
+
+                                }
+
+                            }
+                            //else
+                            //{
+                            //    if (contador > 3)
+                            //        repetir = false;
+                            //}
 
 
                         } while (repetir);
@@ -1659,23 +1950,23 @@ namespace SMG
                                                 }
 
                                                 // Verifica se existe o arquivo e deleta
-                                                if (!System.IO.File.Exists(nameFile))
-                                                    req.DownloadFileTaskAsync(strURL, nameFile);
+                                                //if (!System.IO.File.Exists(nameFile))
+                                                //req.DownloadFileTaskAsync(strURL, nameFile);
 
-                                                FileInfo file = new FileInfo(nameFile);
+                                                //FileInfo file = new FileInfo(nameFile);
 
-                                                Boolean aguardar = true;
-                                                do
-                                                {
-                                                    if (file.Exists && (file.Length > 0))
-                                                    {
-                                                        aguardar = false;
-                                                    }
-                                                    file.Refresh();
-                                                }
-                                                while (aguardar);
+                                                //Boolean aguardar = true;
+                                                //do
+                                                //{
+                                                //    if (file.Exists && (file.Length > 0))
+                                                //    {
+                                                //        aguardar = false;
+                                                //    }
+                                                //    file.Refresh();
+                                                //}
+                                                //while (aguardar);
 
-                                                certame.ListTabArquivos.Add(nameFile);
+                                                //certame.ListTabArquivos.Add(nameFile);
 
                                                 contadorProcuraLinks += 2;
 
