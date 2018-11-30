@@ -225,7 +225,7 @@ namespace BusinessSelenium
 
             try
             {
-                
+
                 bool repeatOperation = false;
                 int numberAttempts = 0;
 
@@ -283,7 +283,7 @@ namespace BusinessSelenium
                     done &= false;
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 done = false;
             }
@@ -416,14 +416,15 @@ namespace BusinessSelenium
             return retorno;
         }
 
-        public string trocarDeContextoHandleWindow(IWebDriver driver, String _urlPopUp)
+        public string trocarDeContextoHandleWindow(IWebDriver driver, String _urlPopUp, Boolean _waitElements = true)
         {
             ////////////////////////////////// AGUARDA ABRIR POPUP E GUARDA A PÁGINA PRINCIPAL //////////////////////////////////
 
             // List<IWebElement> frames = new List<IWebElement>(driver.FindElements(By.TagName("frame")));
 
-            while (driver.WindowHandles.Count < 2)
-                Thread.Sleep(250);
+            if (_waitElements)
+                while (driver.WindowHandles.Count < 2)
+                    Thread.Sleep(250);
 
             string currentHandle = String.Empty;
 
@@ -431,7 +432,7 @@ namespace BusinessSelenium
             {
                 currentHandle = driver.CurrentWindowHandle;
             }
-            catch(Exception e)
+            catch (Exception e)
             { }
 
             foreach (string handle in driver.WindowHandles)
@@ -461,7 +462,7 @@ namespace BusinessSelenium
                 driver.SwitchTo().Window(currentHandle);
                 driver.SwitchTo().DefaultContent();
             }
-            catch(Exception e)
+            catch (Exception e)
             {
 
             }
